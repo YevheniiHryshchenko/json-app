@@ -1,0 +1,13 @@
+.article {
+	padding: 12px;
+	border:2px solid silver;
+}
+
+.content {
+	padding: 10px;
+	border:1px solid silver;
+
+	&:not(:last-child) {
+		margin-bottom: 20px;
+	}
+}

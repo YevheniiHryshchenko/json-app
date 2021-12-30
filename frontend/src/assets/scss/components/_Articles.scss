@@ -1,0 +1,10 @@
+.articles {
+	padding-bottom: 40px;
+	padding-top: 80px;
+}
+
+.article {
+	&:not(:last-child) {
+		margin-bottom: 50px;
+	}
+}

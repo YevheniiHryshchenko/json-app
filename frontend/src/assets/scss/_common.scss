@@ -1,0 +1,27 @@
+html {
+	scroll-behavior: smooth;
+}
+
+a {
+	&:hover {
+		text-decoration: none;
+		opacity: .7;
+	}
+}
+
+input,
+select,
+button,
+textarea {
+	&:focus {
+		outline: none;
+	}
+}
+
+textarea {
+	resize: none;
+}
+
+.overflow-auto {
+	overflow: auto;
+}
