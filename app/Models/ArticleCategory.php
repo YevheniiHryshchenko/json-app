@@ -24,7 +24,6 @@ class ArticleCategory extends Model
     protected $fillable = [
         'article_id',
         'category_id',
-        'is_primary',
-        'number'
+        'is_primary'
     ];
 }

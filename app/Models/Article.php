@@ -21,14 +21,13 @@ class Article extends Model
 
     public function content()
     {
-        return $this->belongsToMany(Content::class);
+        return $this->belongsToMany(Content::class)->withTimestamps();
     }
 
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withPivot([
             'is_primary',
-            'number',
             'created_at',
             'updated_at'
         ]);
@@ -36,6 +35,41 @@ class Article extends Model
 
     public function media()
     {
-        return $this->belongsToMany(Media::class);
+        return $this->belongsToMany(Media::class)->withTimestamps();
+    }
+
+    public function filterByCategoryId($categoryId, $query = null)
+    {
+        $query = $query === null ? $this : $query;
+
+        if ($categoryId != '0') {
+            return $query->whereHas('categories', function ($query) use ($categoryId) {
+                return $query->where([
+                    'id' => $categoryId,
+                    'is_primary' => true
+                ]);
+            });
+        }
+
+        return $query;
+    }
+
+    public function filterBySearchedText($searchedText, $query = null)
+    {
+        $query = $query === null ? $this : $query;
+
+        if ($searchedText != '') {
+            return $query->where(
+                'title',
+                'LIKE',
+                '%' . $searchedText . '%'
+            )->orWhere(function ($query) use ($searchedText) {
+                $query->whereHas('content', function ($query) use ($searchedText) {
+                    return $query->where('content', 'LIKE', '%' . $searchedText . '%');
+                });
+            });
+        }
+
+        return $query;
     }
 }

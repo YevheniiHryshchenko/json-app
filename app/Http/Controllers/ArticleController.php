@@ -11,28 +11,11 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $articles = Article::when($request->categoryId != '0', function ($query) use ($request) {
-                return $query->whereHas('categories', function ($query) use ($request) {
-                    return $query->where([
-                        'id' => $request->categoryId,
-                        'is_primary' => true
-                    ]);
-                });
-            })
-            ->when($request->searchedTitleText != '', function ($query) use ($request) {
-                return $query->where('title', 'LIKE', '%' . $request->searchedTitleText . '%');
-            })
-            ->when($request->searchedBodyText != '', function ($query) use ($request) {
-                return $query->whereHas('content', function ($query) use ($request) {
-                    return $query->where('content', 'LIKE', '%' . $request->searchedBodyText . '%');
-                });
-            })
-            ->paginate(config('resources.available_quantity_at_time'));
+        $articles = Article::paginate(config('resources.available_quantity_at_time'));
 
         $articles->setCollection(
             collect(ArticleResource::collection($articles->getCollection()))
@@ -49,6 +32,26 @@ class ArticleController extends Controller
     public function create()
     {
         //
+    }
+
+    /**
+     * Get filtered articles.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Article  $article
+     * @return \Illuminate\Http\Response
+     */
+    public function getFilteredData(Request $request, Article $article)
+    {
+        $query = $article->filterByCategoryId($request->categoryId);
+        $query = $article->filterBySearchedText($request->searchedText, $query);
+        $articles = $query->paginate(config('resources.available_quantity_at_time'));
+
+        $articles->setCollection(
+            collect(ArticleResource::collection($articles->getCollection()))
+        );
+
+        return response()->json($articles, 200);
     }
 
     /**

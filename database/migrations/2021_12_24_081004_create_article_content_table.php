@@ -18,6 +18,7 @@ class CreateArticleContentTable extends Migration
             $table->foreign('article_id')->references('id')->on('articles');
             $table->foreignId('content_id');
             $table->foreign('content_id')->references('id')->on('content');
+            $table->primary(['article_id', 'content_id']);
             $table->timestamps();
         });
     }

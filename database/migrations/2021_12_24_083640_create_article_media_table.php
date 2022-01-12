@@ -18,6 +18,7 @@ class CreateArticleMediaTable extends Migration
             $table->foreign('article_id')->references('id')->on('articles');
             $table->foreignId('media_id');
             $table->foreign('media_id')->references('id')->on('media');
+            $table->primary(['article_id', 'media_id']);
             $table->timestamps();
         });
     }

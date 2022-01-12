@@ -6,11 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Article;
 use App\Models\Content;
-use App\Models\ArticleContent;
 use App\Models\Category;
-use App\Models\ArticleCategory;
 use App\Models\Media;
-use App\Models\ArticleMedia;
 
 class ProcessJson extends Command
 {
@@ -60,10 +57,7 @@ class ProcessJson extends Command
                     'attributes' => json_encode($elContent['attributes'])
                 ]);
 
-                ArticleContent::create([
-                    'article_id' => $article->id,
-                    'content_id' => $content->id
-                ]);
+                $article->content()->attach($content->id);
             }
 
             $categories = [
@@ -77,11 +71,8 @@ class ProcessJson extends Command
                         'name' => $category
                     ]);
 
-                    ArticleCategory::create([
-                        'article_id' => $article->id,
-                        'category_id' => $categoryModel->id,
-                        'is_primary' => $key === 0 || ($key === 1 && !$categories[0]),
-                        'number' => $key
+                    $article->categories()->attach($categoryModel->id, [
+                        'is_primary' => $key === 0 || ($key === 1 && !$categories[0])
                     ]);
                 }
             }
@@ -92,10 +83,7 @@ class ProcessJson extends Command
                     'info' => json_encode($elMedia['media'])
                 ]);
 
-                ArticleMedia::create([
-                    'article_id' => $article->id,
-                    'media_id' => $media->id
-                ]);
+                $article->media()->attach($media->id);
             }
         }
     }

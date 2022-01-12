@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('articles', 'ArticleController@index');
 Route::get('categories', 'CategoryController@index');
+Route::post('articles/getFilteredData', 'ArticleController@getFilteredData');

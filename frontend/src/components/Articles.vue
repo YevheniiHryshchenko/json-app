@@ -19,13 +19,8 @@
       <div class="p-3 border mb-5">
         <h2>Search</h2>
         <hr>
-        <span class="d-block mb-2"><b>In title</b></span>
-        <input class="w-100 p-2 mb-3" v-model="searchedTitleText" placeholder="Search in title ...">
-        <p><span class="font-italic">Searched title text: </span>{{savedSearchedTitleText}}</p>
-        <hr>
-        <span class="d-block mb-2"><b>In body</b></span>
-        <input class="w-100 p-2 mb-3" v-model="searchedBodyText" placeholder="Search in body ...">
-        <p><span class="font-italic">Searched body text: </span>{{savedSearchedBodyText}}</p>
+        <input class="w-100 p-2 mb-3" v-model="searchedText" placeholder="Search in articles ...">
+        <p><span class="font-italic">Searched text: </span>{{savedSearchedText}}</p>
         <hr>
         <button @click="searchText" type="button" class="btn btn-primary w-100">Search</button>
       </div>
@@ -48,10 +43,8 @@ export default {
   data() {
     return {
       pageData: [],
-      searchedTitleText: '',
-      savedSearchedTitleText: '',
-      searchedBodyText: '',
-      savedSearchedBodyText: '',
+      searchedText: '',
+      savedSearchedText: '',
       currentCategoryId: 0,
       categories: [
         {
@@ -77,23 +70,28 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.loadPageData(this.$route.params.num);
+      if (
+        this.savedSearchedText === '' &&
+        this.currentCategoryId === 0
+      ) {
+        this.loadPageData(this.$route.params.num);
+      } else {
+        this.getFilteredPageData();
+      }
     }
   },
   methods: {
     searchText() {
-      this.savedSearchedTitleText = this.searchedTitleText;
-      this.savedSearchedBodyText = this.searchedBodyText;
+      this.savedSearchedText = this.searchedText;
       this.startPageDataLoading();
     },
     changeCategory() {
-      this.savedSearchedTitleText = '';
-      this.savedSearchedBodyText = '';
+      this.savedSearchedText = '';
       this.startPageDataLoading();
     },
     startPageDataLoading() {
       if (this.$route.params.num == '1') {
-        this.loadPageData(this.$route.params.num);
+        this.getFilteredPageData();
       } else {
         this.$router.push({ path: '/articles/page/1' });
       }
@@ -113,20 +111,40 @@ export default {
       console.log('Page data loading');
 
       axios
-        .get(
-          `${process.env.VUE_APP_BASE_URL}/api/articles?page=${pageNum}`
-            + `&categoryId=${this.currentCategoryId}`
-            + `&searchedTitleText=${this.savedSearchedTitleText}`
-            + `&searchedBodyText=${this.savedSearchedBodyText}`
+        .get(`${process.env.VUE_APP_BASE_URL}/api/articles?page=${pageNum}`)
+        .then(response => {
+          console.log('Response', response);
+          this.savePageData(response.data);
+          this.checkPaginationRoute();
+        })
+        .catch(error => {
+          console.log(error.response.data);
+        });
+    },
+    savePageData(data) {
+      this.pageData = data;
+
+      this.pageData.pages = Math.ceil(
+        this.pageData.total / this.pageData.per_page
+      );
+    },
+    getFilteredPageData() {
+      window.scrollTo(0, 0);
+      this.pageData = [];
+      console.log('Page data loading');
+
+      axios
+        .post(
+          `${process.env.VUE_APP_BASE_URL}/api/articles/getFilteredData`,
+          {
+            page: this.$route.params.num,
+            categoryId: this.currentCategoryId,
+            searchedText: this.savedSearchedText
+          }
         )
         .then(response => {
           console.log('Response', response);
-          this.pageData = response.data;
-
-          this.pageData.pages = Math.ceil(
-            this.pageData.total / this.pageData.per_page
-          );
-
+          this.savePageData(response.data);
           this.checkPaginationRoute();
         })
         .catch(error => {

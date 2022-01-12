@@ -18,7 +18,6 @@ class ArticleCategoryResource extends JsonResource
             'article_id' => $this->article_id,
             'category_id' => $this->category_id,
             'is_primary' => $this->is_primary,
-            'number' => $this->number,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];
